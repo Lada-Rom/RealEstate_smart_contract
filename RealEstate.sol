@@ -1,73 +1,58 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-//["http",1,true]
+import "./ERC20.sol";
+
+
+contract RESToken is ERC20 {
+    constructor(address shop) ERC20("RESToken", "REST", 1, shop) {}
+}
+
+
 contract RealEstate {
+    IERC20 public token;
+    address payable public owner;
 
-    constructor(Property memory _property) {
-        owner = msg.sender;
-        property = _property;
-        timestamp = block.timestamp;
+    event Bought(address indexed buyer, uint256 amount);
+    event Sold(address indexed seller, uint256 amount);
 
-        history.push(Transaction({
-            new_owner: owner,
-            timestamp: timestamp,
-            property: property
-        }));
+    //====== constructor ======
+    constructor() {
+        token = new RESToken(address(this));
+        owner = payable(msg.sender);
     }
 
-    address public owner = address(0);
-    Property public property;
-    uint256 public timestamp; //time of property acquisition
-
-    Transaction[] public history;
-
-    //=======startSelling=============
-    function startSelling() external {
-        require(msg.sender == owner, "Only owner can start property selling!");
-        property.isSelling = true;
+    //====== onlyOwner ======
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not an owner!");
+        _;
     }
 
-    //=======stoptSelling=============
-    function stopSelling() external {
-        require(msg.sender == owner, "Only owner can stop property selling!");
-        property.isSelling = false;
+    //====== sell ======
+    function sell(uint256 amountToSell) external {
+        require(amountToSell > 0, "Zero tokens are not allowed");
+        require(token.balanceOf(msg.sender) >= amountToSell, "Not enough tokens to sell!");
+
+        uint256 allowance = token.allowance(msg.sender, address(this));
+        require(allowance >= amountToSell, "Such amount not allowed!");
+
+        token.transferFrom(msg.sender, address(this), amountToSell);
+        payable(msg.sender).transfer(amountToSell); // 1 token = 1 wei
+        emit Sold(msg.sender, amountToSell);
     }
 
-    //=======setPrice=============
-    function setPrice(uint256 new_price) external {
-        require(msg.sender == owner, "Only owner can change property price!");
-        property.price = new_price;
+    //====== receive ======
+    receive() external payable {
+        uint256 tokensToBuy = msg.value; // 1 token = 1 wei
+        require(tokensToBuy > 0, "Zero tokens are not allowed");
+        require(tokenBalance() >= tokensToBuy, "Too much tokens to buy!");
+    
+        token.transfer(msg.sender, tokensToBuy);
+        emit Bought(msg.sender, tokensToBuy);
     }
 
-    //=======buyProperty=============
-    function buyProperty() external payable {
-        address buyer = msg.sender;
-        require(property.isSelling == true, "Property is not selling now!");
-        require(owner != buyer, "Selfbuying is not allowed!");
-        require(msg.value >= property.price, "Not enough money!");
-
-        address payable toOwner = payable(owner);
-        toOwner.transfer(msg.value);
-        timestamp = block.timestamp;
-        owner = buyer;
-
-        history.push(Transaction({
-            new_owner: owner,
-            timestamp: timestamp,
-            property: property
-        }));
-    }
-
-    struct Property {
-        string ownership;
-        uint256 price;
-        bool isSelling;
-    }
-
-    struct Transaction {
-        address new_owner;
-        uint256 timestamp;
-        Property property;
+    //====== tokenBalance ======
+    function tokenBalance() public view returns(uint256) {
+        return token.balanceOf(address(this));
     }
 }
