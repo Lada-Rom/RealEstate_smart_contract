@@ -5,24 +5,24 @@ import "./ERC20.sol";
 
 
 contract RESToken is ERC20 {
+    //====== constructor ======
     constructor(address shop) ERC20("RESToken", "REST", 1, shop) {}
 }
 
 
 struct Property {
     string ownership;
-    //uint256 price;
+    uint256 price;
     bool isSelling;
 }
 
 
-//["https://property.pdf", true]
+//["https://property.pdf", 1, true]
 contract RealEstate is RESToken {
     address public address_shop;
     Property public property;
 
-    event Bought(address indexed buyer, uint256 amount);
-    event Sold(address indexed seller, uint256 amount);
+    event Bought(address indexed buyer, uint256 cost, uint256 timestamp);
 
     //====== constructor ======
     constructor(Property memory prop) RESToken(address(this)) {
@@ -50,11 +50,17 @@ contract RealEstate is RESToken {
     }
 
 
+    //====== setPrice ======
+    function setPrice(uint256 new_price) external onlyOwner {
+        property.price = new_price;
+    }
+
+
     //====== buyProperty ======
     function buyProperty() external notOwner payable {
         address address_buyer = msg.sender;
         require(property.isSelling == true, "Property is not selling now!");
-        require(msg.value >= 1 wei, "Not enough money to buy token!");
+        require(msg.value >= property.price, "Not enough money to buy token!");
 
         transferFrom(address_owner, address_buyer, balanceOf(address_owner));
 
@@ -62,5 +68,6 @@ contract RealEstate is RESToken {
         toOwner.transfer(msg.value);
 
         address_owner = address_buyer;
+        emit Bought(address_buyer, msg.value, block.timestamp);
     }
 }

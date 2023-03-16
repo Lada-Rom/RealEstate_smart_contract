@@ -10,7 +10,7 @@ describe("RealEstate", function () {
     beforeEach(async function() {
         [owner, buyer] = await ethers.getSigners()
         const RealEstate = await ethers.getContractFactory("RealEstate", owner)
-        RealEstate_instance = await RealEstate.deploy(["https://property.pdf", true])
+        RealEstate_instance = await RealEstate.deploy(["https://property.pdf", 1, true])
         await RealEstate_instance.deployed()
 
         //erc20 = new ethers.Contract(await shop.token(), tokenJSON.abi, owner)
@@ -28,12 +28,12 @@ describe("RealEstate", function () {
     it("3 only owner can change property selling flag", async function () {
         const stopSelling_ = await RealEstate_instance.connect(owner).stopSelling()
         await stopSelling_.wait()
-        let [owernship_1, isSelling_1] = await RealEstate_instance.property()
+        let [owernship_1, price_1, isSelling_1] = await RealEstate_instance.property()
         expect(isSelling_1).to.equal(false)
 
         const startSelling_ = await RealEstate_instance.connect(owner).startSelling()
         await startSelling_.wait()
-        let [owernship_2, isSelling_2] = await RealEstate_instance.property()
+        let [owernship_2, price_2, isSelling_2] = await RealEstate_instance.property()
         expect(isSelling_2).to.equal(true)
 
         expect(RealEstate_instance.connect(buyer).stopSelling()).to.be.reverted //null
@@ -41,12 +41,15 @@ describe("RealEstate", function () {
 
     })
 
-    //it("4 buyer can buy property if enough wei and property is selling", async function (){
-    //    const stopSelling_ = await RealEstate_instance.connect(owner).stopSelling()
-    //    await stopSelling_.wait()
+    it("4 only owner can change property price", async function (){
+        const new_price = 2
+        const setPrice_ = await RealEstate_instance.connect(owner).setPrice(new_price)
+        await setPrice_.wait()
+        let [owernship, price, isSelling] = await RealEstate_instance.property()
+        expect(price).to.equal(new_price)
 
-    //    expect(RealEstate_instance.connect(buyer).buyProperty()).to.be.reverted
-    //})
+        expect(RealEstate_instance.connect(buyer).setPrice(new_price)).to.be.reverted //null
+    })
 })
 
         //const tokenAmount = 3
