@@ -1,73 +1,54 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-//["http",1,true]
-contract RealEstate {
+import "./ERC20.sol";
 
-    constructor(Property memory _property) {
-        owner = msg.sender;
-        property = _property;
-        timestamp = block.timestamp;
 
-        history.push(Transaction({
-            new_owner: owner,
-            timestamp: timestamp,
-            property: property
-        }));
-    }
+contract RESToken is ERC20 {
+    constructor(address shop) ERC20("RESToken", "REST", 1, shop) {}
+}
 
-    address public owner = address(0);
+
+struct Property {
+    string ownership;
+    //uint256 price;
+    //bool isSelling;
+}
+
+
+//["https://property.pdf"]
+contract RealEstate is RESToken {
+    address public address_shop;
     Property public property;
-    uint256 public timestamp; //time of property acquisition
 
-    Transaction[] public history;
+    event Bought(address indexed buyer, uint256 amount);
+    event Sold(address indexed seller, uint256 amount);
 
-    //=======startSelling=============
-    function startSelling() external {
-        require(msg.sender == owner, "Only owner can start property selling!");
-        property.isSelling = true;
+    //====== constructor ======
+    constructor(Property memory prop) RESToken(address(this)) {
+        address_shop = address(this);
+        address_owner = payable(msg.sender);
+        property = prop;
     }
 
-    //=======stoptSelling=============
-    function stopSelling() external {
-        require(msg.sender == owner, "Only owner can stop property selling!");
-        property.isSelling = false;
+
+    //====== notOwner ======
+    modifier notOwner() {
+        require(msg.sender != address_owner, "Owner is not allowed to perform this operation!");
+        _;
     }
 
-    //=======setPrice=============
-    function setPrice(uint256 new_price) external {
-        require(msg.sender == owner, "Only owner can change property price!");
-        property.price = new_price;
-    }
 
-    //=======buyProperty=============
-    function buyProperty() external payable {
-        address buyer = msg.sender;
-        require(property.isSelling == true, "Property is not selling now!");
-        require(owner != buyer, "Selfbuying is not allowed!");
-        require(msg.value >= property.price, "Not enough money!");
+    //====== buyProperty ======
+    function buyProperty() external notOwner payable {
+        address address_buyer = msg.sender;
+        require(msg.value >= 1 wei, "Not enough money!");
 
-        address payable toOwner = payable(owner);
+        transferFrom(address_owner, address_buyer, balanceOf(address_owner));
+
+        address payable toOwner = payable(address_owner);
         toOwner.transfer(msg.value);
-        timestamp = block.timestamp;
-        owner = buyer;
 
-        history.push(Transaction({
-            new_owner: owner,
-            timestamp: timestamp,
-            property: property
-        }));
-    }
-
-    struct Property {
-        string ownership;
-        uint256 price;
-        bool isSelling;
-    }
-
-    struct Transaction {
-        address new_owner;
-        uint256 timestamp;
-        Property property;
+        address_owner = address_buyer;
     }
 }
