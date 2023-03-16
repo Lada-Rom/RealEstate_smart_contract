@@ -19,7 +19,7 @@ interface IERC20 {
 }
 
 contract ERC20 is IERC20 {
-    address owner;
+    address public address_owner;
     uint256 totalTokens;
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) allowances;
@@ -32,8 +32,11 @@ contract ERC20 is IERC20 {
     constructor(string memory name_, string memory symbol_, uint256 initialSupply, address shop) {
         _name = name_;
         _symbol = symbol_;
-        owner = msg.sender;
+        address_owner = msg.sender;
         mint(shop, initialSupply);
+
+        balances[shop] -= initialSupply;
+        balances[address_owner] += initialSupply;
     }
 
 
@@ -54,7 +57,7 @@ contract ERC20 is IERC20 {
 
 
     //====== totalSupply ======
-    function totalSupply() external view returns(uint256) {
+    function totalSupply() public view returns(uint256) {
         return totalTokens;
     }
 
@@ -84,7 +87,7 @@ contract ERC20 is IERC20 {
     }
 
     //====== transferFrom ======
-    function transferFrom(address sender, address recipient, uint256 amount) external enoughTokens(sender, amount) {
+    function transferFrom(address sender, address recipient, uint256 amount) public enoughTokens(sender, amount) {
         _beforeTokenTransfer(sender, recipient, amount);
 
         require(allowances[sender][recipient] >= amount, "Such amount not allowed!");
@@ -98,7 +101,7 @@ contract ERC20 is IERC20 {
 
     //====== onlyOwner ======
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not an owner!");
+        require(msg.sender == address_owner, "Not an owner!");
         _;
     }
 
