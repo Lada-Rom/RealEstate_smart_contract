@@ -12,11 +12,11 @@ contract RESToken is ERC20 {
 struct Property {
     string ownership;
     //uint256 price;
-    //bool isSelling;
+    bool isSelling;
 }
 
 
-//["https://property.pdf"]
+//["https://property.pdf", true]
 contract RealEstate is RESToken {
     address public address_shop;
     Property public property;
@@ -39,10 +39,22 @@ contract RealEstate is RESToken {
     }
 
 
+    //====== startSelling ======
+    function startSelling() external onlyOwner {
+        property.isSelling = true;
+    }
+
+    //====== stopSelling ======
+    function stopSelling() external onlyOwner {
+        property.isSelling = false;
+    }
+
+
     //====== buyProperty ======
     function buyProperty() external notOwner payable {
         address address_buyer = msg.sender;
-        require(msg.value >= 1 wei, "Not enough money!");
+        require(property.isSelling == true, "Property is not selling now!");
+        require(msg.value >= 1 wei, "Not enough money to buy token!");
 
         transferFrom(address_owner, address_buyer, balanceOf(address_owner));
 

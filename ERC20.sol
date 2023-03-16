@@ -90,7 +90,7 @@ contract ERC20 is IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) public enoughTokens(sender, amount) {
         _beforeTokenTransfer(sender, recipient, amount);
 
-        require(allowances[sender][recipient] >= amount, "Such amount not allowed!");
+        require(allowances[sender][recipient] >= amount, "Such token amount not allowed to transfer!");
         allowances[sender][recipient] -= amount;
         balances[sender] -= amount;
         balances[recipient] += amount;
@@ -101,13 +101,13 @@ contract ERC20 is IERC20 {
 
     //====== onlyOwner ======
     modifier onlyOwner() {
-        require(msg.sender == address_owner, "Not an owner!");
+        require(msg.sender == address_owner, "Only owner allowed to perform this operation!");
         _;
     }
 
     //====== enoughTokens ======
     modifier enoughTokens(address _from, uint256 amount) {
-        require(balanceOf(_from) >= amount, "Not enough tokens!");
+        require(balanceOf(_from) >= amount, "Not enough tokens on your balance!");
         _;
     }
 
