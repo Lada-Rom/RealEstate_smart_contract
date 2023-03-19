@@ -119,7 +119,7 @@ contract ERC721 is IERC721 {
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal {
-        require(ownerOf(tokenId) == from, "Spender does not own the token!");
+        require(to != from, "Self transfer is not allowed!");
         require(to != address(0), "Transfer to zero address is not allowed!");
 
         balances[from] -= 1;
@@ -165,8 +165,8 @@ contract ERC721 is IERC721 {
         require(_isApprovedOrOwner(msg.sender, tokenId), "Not approved and sender is not an owner!");
         address owner = ownerOf(tokenId);
 
-        delete tokenApprovals[tokenId]; //address(0)
+        delete tokenApprovals[tokenId];
         balances[owner] -= 1;
-        delete owners[tokenId]; //address(0)
+        delete owners[tokenId];
     }
 }
