@@ -119,7 +119,7 @@ contract ERC721 is IERC721 {
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal {
-        require(ownerOf(tokenId) == from, "Spender does not own the token!");
+        require(to != from, "Self transfer is not allowed!");
         require(to != address(0), "Transfer to zero address is not allowed!");
 
         balances[from] -= 1;
