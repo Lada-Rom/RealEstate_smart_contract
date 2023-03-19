@@ -35,7 +35,10 @@ contract RESToken is ERC721 {
 
 
 contract RealEstate is RESToken, API {
+    mapping(address => bool) verificated;
+    mapping(uint256 => Transaction) history;
 
+    event TokenConstructed(address indexed owner, uint256 indexed tokenId);
 
     constructor() RESToken() {}
 
@@ -62,6 +65,95 @@ contract RealEstate is RESToken, API {
             cost: cost,
             isSelling: true});
         _safeMint(msg.sender, tokenId);
+
+        emit TokenConstructed(msg.sender, tokenId);
+        _addHistoryTransaction(address(0), msg.sender, tokenId, cost);
     }
 
+    function verifyMe(string memory login, string memory password) public {
+        require(verifyUser(login, password), "User verification failed!");
+        verificated[msg.sender] = true;
+    }
+
+    function startSelling(uint256 tokenId) public {
+        require(_isApprovedOrOwner(msg.sender, tokenId), "Operator not approved and sender is not an owner!");
+        tokens[tokenId].isSelling = true;
+    }
+
+    function stopSelling(uint256 tokenId) public {
+        require(_isApprovedOrOwner(msg.sender, tokenId), "Operator not approved and sender is not an owner!");
+        tokens[tokenId].isSelling = false;
+    }
+
+    function setPropertyCost(uint256 tokenId, uint256 new_cost) public {
+        require(_isApprovedOrOwner(msg.sender, tokenId), "Operator not approved and sender is not an owner!");
+        tokens[tokenId].cost = new_cost;
+    }
+
+    function getAllTokens(address owner) public view returns(uint256[] memory) {
+        uint256 tokenIdQuantity = 0;
+        for(uint8 tokenId = 1; tokenId <= maxTokenId; tokenId += 1)
+            if(_exists(tokenId) && ownerOf(tokenId) == owner)
+                tokenIdQuantity += 1;
+
+        uint256[] memory tokensList = new uint256[](tokenIdQuantity);
+        uint256 tokenCurr = 0;
+        for(uint8 tokenId = 1; tokenId <= maxTokenId; tokenId += 1) {
+            if(_exists(tokenId) && ownerOf(tokenId) == owner) {
+                tokensList[tokenCurr] = tokenId;
+                tokenCurr += 1;
+            }                
+        }
+
+        return tokensList;
+    }
+
+
+    function propertyOf(uint tokenId) public view requireMinted(tokenId) returns(Property memory) {
+        return tokens[tokenId];
+    }
+
+
+    function burnToken(uint256 tokenId) public {
+        _burn(tokenId);
+
+        totalSupply -= 1;
+        delete tokens[tokenId];
+        _addHistoryTransaction(msg.sender, address(0), tokenId, tokens[tokenId].cost);
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId) public override payable {
+        _beforeTransfer(tokenId);
+        address payable toOwner = payable(ownerOf(tokenId));
+        toOwner.transfer(msg.value);
+
+        super.safeTransferFrom(from, to, tokenId);
+        updateOwnerInfo(tokens[tokenId].document);
+        _addHistoryTransaction(from, to, tokenId, tokens[tokenId].cost);
+    }
+
+    function transferFrom(address from, address to, uint256 tokenId) public override payable {            
+        _beforeTransfer(tokenId);
+        address payable toOwner = payable(ownerOf(tokenId));
+        toOwner.transfer(msg.value);
+
+        super.transferFrom(from, to, tokenId);
+        updateOwnerInfo(tokens[tokenId].document);
+        _addHistoryTransaction(from, to, tokenId, tokens[tokenId].cost);
+    }
+
+    function _beforeTransfer(uint256 tokenId) internal {
+        require(verificated[msg.sender], "Please, pass verification by calling verifyMe()!");
+        require(tokens[tokenId].isSelling == true, "Property is not selling now!");
+        require(msg.value >= tokens[tokenId].cost, "Not enough money to buy token!");
+    }
+
+    function _addHistoryTransaction(address from, address to, uint256 tokenId, uint256 cost) internal {
+        history[block.timestamp] = Transaction({
+            from:       from,
+            to:         to,
+            tokenId:    tokenId,
+            cost:       cost
+        });
+    }
 }

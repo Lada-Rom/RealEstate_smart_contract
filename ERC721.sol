@@ -165,8 +165,8 @@ contract ERC721 is IERC721 {
         require(_isApprovedOrOwner(msg.sender, tokenId), "Not approved and sender is not an owner!");
         address owner = ownerOf(tokenId);
 
-        delete tokenApprovals[tokenId]; //address(0)
+        delete tokenApprovals[tokenId];
         balances[owner] -= 1;
-        delete owners[tokenId]; //address(0)
+        delete owners[tokenId];
     }
 }
