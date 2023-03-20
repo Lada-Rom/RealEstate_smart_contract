@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0
+
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
@@ -51,7 +53,7 @@ describe("RealEstate", function () {
         let Prop 
         // создаём токен
         await RealEstate_instance.connect(owner).constructToken("ipfs://dead_end", 1, "login", "password")
-
+        // меняем стоимость токена
         await RealEstate_instance.connect(owner).setPropertyCost(1, 1000)
         Prop = await RealEstate_instance.propertyOf(1)
         await expect(Prop.cost).to.equal(1000)
@@ -66,7 +68,7 @@ describe("RealEstate", function () {
         await RealEstate_instance.connect(owner).constructToken("ipfs://dead_end_3", 3, "login", "password")
         await RealEstate_instance.connect(owner).constructToken("ipfs://dead_end_4", 4, "login", "password")
         await RealEstate_instance.connect(owner).constructToken("ipfs://dead_end_5", 5, "login", "password")
-
+        // проверяем кол-во токенов у создателя 5ти токенов
         count = (await RealEstate_instance.connect(owner).getAllTokens(owner.address)).length
         expect(count).to.equal(5)
     })
@@ -112,6 +114,8 @@ describe("RealEstate", function () {
     })
 
     it("Fallback check", async function () {
+        // тестирование fallback функции
+        // https://stackoverflow.com/a/72588852
         const nonExistentFuncSignature = 'nonExistentFunc(uint256,uint256)';
         const fakeDemoContract = new ethers.Contract(
         RealEstate_instance.address,
