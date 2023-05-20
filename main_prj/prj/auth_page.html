@@ -8,6 +8,8 @@
         <link rel="stylesheet" type="text/css" href="index.css">
         <script src="./node_modules/web3/dist/web3.min.js"></script>
         <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="./deploy_contract.js"></script>
+        <script src="./re_abi.js"></script>
     </head>
     <script type="text/javascript">
         web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
@@ -48,7 +50,8 @@
             const user_data_url = 'http://localhost:3000/user_session.php';
             document.getElementById("button").onclick = function () {
                 postUserCredentials();
-                location.href = "./choice_page.html";
+                deploy(re_sm_abi, re_sm_bytecode);
+                //location.href = "./choice_page.html";
             };
         </script>
     </body>
