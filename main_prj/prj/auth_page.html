@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <link rel="stylesheet" type="text/css" href="index.css">
+        <script src="./node_modules/web3/dist/web3.min.js"></script>
+        <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+    </head>
+    <script type="text/javascript">
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+
+        let addr_list = [];
+        const url = 'http://localhost:3000/post_ganache_accs.php';
+
+        async function postAccounts() {
+            addr_list = await web3.eth.getAccounts();
+            //console.log(addr_list);
+            var str_arg = JSON.stringify(addr_list);
+            var res = await $.post(url, { GanacheAccounts: args });
+        }
+    </script>
+    <body>
+        <div class="Authentication">
+            <h1>RealEstate Super DApp</h1>
+            <label for="login" class="col-lg-2 control-label">login</label>
+            <input id="login" type="text">
+            <label for="pswd" class="col-lg-2 control-label">password</label>
+            <input id="pswd" type="text">
+            <button id="button" type="submit">Let's rock!</button>
+        </div>
+        <script type="text/javascript">
+            // best QnA EEEEVER 
+            // https://question-it.com/questions/11136707/kak-predotvratit-perezagruzku-posle-zaprosa-na-publikatsiju
+            $(document).ready(function(){
+                postAccounts();
+            });
+
+            async function postUserCredentials() {
+                var s = await $.post(user_data_url, {
+                    LOGIN: document.getElementById("login").value,
+                    PASSWORD: document.getElementById("pswd").value
+                });
+                //console.log(s);
+            }
+            const user_data_url = 'http://localhost:3000/user_session.php';
+            document.getElementById("button").onclick = function () {
+                postUserCredentials();
+                location.href = "./choice_page.html";
+            };
+        </script>
+    </body>
+</html>

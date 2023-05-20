@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <link rel="stylesheet" type="text/css" href="index.css">
+    </head>
+    <body>
+        <div class="Authentification">
+            <button id="buttonPA" style="float: right;">personal account</button>
+            <h1>Choose One Pill</h1>
+            <img src="https://www.videvo.net/blog/wp-content/uploads/2022/08/the-matrix.jpg" height="300">
+            <button id="buttonBuy">buying</button>
+            <button id="buttonSell">selling</button>
+        </div>
+        <script> 
+            document.getElementById("buttonBuy").onclick = function () {
+                location.href = "./buying_page.html";
+            };
+            document.getElementById("buttonSell").onclick = function () {
+                location.href = "./selling_page.html";
+            };
+            document.getElementById("buttonPA").onclick = function () {
+                location.href = "./personal_acc_page.html";
+            };
+        </script>
+    </body>
+</html>

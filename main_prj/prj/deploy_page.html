@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <link rel="stylesheet" type="text/css" href="index.css">
+        <script src="./node_modules/web3/dist/web3.min.js"></script>
+        <script src="./abi_.js"></script>
+    </head>
+    <body>
+        <div class="Authentification">
+            <h1>RealEstate Super DApp</h1>
+        </div>
+        <script>
+            console.log(re_sm_contract_addr);
+            console.log(re_sm_abi);
+            //Contract.setProvider('ws://localhost:8546');
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+
+            // https://www.geeksforgeeks.org/how-to-deploy-contract-from-nodejs-using-web3/
+            var contract = new web3.eth.Contract(re_sm_abi);
+            web3.eth.getAccounts().then((accounts) => {
+                // Display all Ganache Accounts
+                console.log("Accounts:", accounts);
+            
+                mainAccount = accounts[0];
+            
+                // address that will deploy smart contract
+                console.log("Default Account:", mainAccount);
+                contract
+                    .deploy({ data: re_sm_bytecode })
+                    .send({ from: mainAccount, gas: 3000000 })
+                    .on("receipt", (receipt) => {
+
+                        // Contract Address will be returned here
+                        console.log("Contract Address:", receipt.contractAddress);
+                    })
+                    .then(function() {
+                        console.log('success!');
+                    });
+            });
+        </script>
+    </body>
+</html>
