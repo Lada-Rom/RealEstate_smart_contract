@@ -18,8 +18,8 @@
         async function postAccounts() {
             addr_list = await web3.eth.getAccounts();
             //console.log(addr_list);
-            var str_arg = JSON.stringify(addr_list);
-            var res = await $.post(url, { GanacheAccounts: args });
+            //var str_arg = JSON.stringify(addr_list);
+            var res = await $.post(url, { GanacheAccounts: addr_list });
         }
     </script>
     <body>

@@ -51,9 +51,9 @@ contract RESToken is ERC721 {
      * @dev количество существующих токенов в смарт-контракте,
      * @dev индекс последнего созданного токена
      */
-    mapping(uint256 => Property) tokens;
+    mapping(uint256 => Property) public tokens;
     uint256 public totalSupply = 0;
-    uint256 maxTokenId = 0;
+    uint256 public maxTokenId = 0;
 
     constructor() ERC721("RESToken", "REST") {}
 

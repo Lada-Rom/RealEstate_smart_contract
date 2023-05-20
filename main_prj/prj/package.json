@@ -1,0 +1,15 @@
+{
+  "name": "prj",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kleymenov A., Tolstenko L.",
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^3.7.0",
+    "web3": "^1.10.0"
+  }
+}
